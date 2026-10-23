@@ -58,15 +58,11 @@ class CrossEncoderDataCollator(BaseDataCollator):
         for label_column in self.valid_label_columns:
             if label_column in column_names:
                 labels = [row[label_column] for row in features]
-                if isinstance(labels[0], torch.Tensor):
-                    # Datasets formatted with e.g. `with_format("torch")` give each label as a tensor: stack
-                    # single values into one tensor, and keep lists of labels as one tensor per sample
+                if isinstance(labels[0], torch.Tensor):  # E.g. datasets with .with_format("torch")
                     batch["label"] = torch.stack(labels) if labels[0].ndim == 0 else labels
                 elif isinstance(labels[0], Collection):
-                    # If the label column is a list/tuple/collection, we create a list of tensors
                     batch["label"] = [torch.tensor(label) for label in labels]
                 else:
-                    # Otherwise, if it's e.g. single values, we create a tensor
                     batch["label"] = torch.tensor(labels)
                 column_names.remove(label_column)
                 break
